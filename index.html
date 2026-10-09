@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Która godzina? Gra z zegarem</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bangers&family=Nunito:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#111111;--pri:#5B2EE0;--acc:#19C3E6;--ground:#FFD60A;--muted:#3A3A3A;--edge:#8A8A8A;
+--ok-bg:#DDF4EA;--ok:#0B6B50;--ok-ink:#084B38;--bad-bg:#FFE9D6;--bad:#A8380A;--bad-ink:#7A2805}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Nunito',system-ui,sans-serif;color:var(--ink);font-synthesis:none;
+background-color:var(--ground);background-image:radial-gradient(#F2B600 22%,transparent 24%);background-size:18px 18px;min-height:100vh}
+.wrap{padding:24px 16px 48px;display:flex;flex-direction:column;align-items:center;gap:24px}
+header{width:100%;max-width:1080px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px}
+h1,h2,.comic{font-family:'Bangers','Nunito',sans-serif;font-weight:400;letter-spacing:.02em}
+h1{margin:0;font-size:44px;line-height:1.1}
+h2{margin:0;font-size:32px;line-height:1.1}
+h2:focus{outline:none}
+.tools{display:flex;flex-wrap:wrap;align-items:center;gap:12px}
+button{font-family:inherit;cursor:pointer}
+input:focus-visible,button:focus-visible{outline:4px solid var(--acc);outline-offset:2px}
+.btn-s{display:flex;align-items:center;gap:8px;min-height:48px;padding:10px 18px;border-radius:999px;border:2px solid var(--ink);background:#fff;color:var(--ink);font-weight:800;font-size:16px}
+.btn{min-height:60px;padding:12px 40px;border:none;border-radius:999px;background:var(--pri);color:#fff;font-family:'Bangers','Nunito',sans-serif;font-size:26px;letter-spacing:.02em;box-shadow:0 6px 0 var(--ink)}
+.btn.alt{background:#fff;color:var(--ink);border:3px solid var(--ink);box-shadow:none}
+.card{width:100%;max-width:640px;background:#fff;border:4px solid var(--ink);border-radius:12px;box-shadow:8px 8px 0 var(--ink);padding:28px 24px 32px;display:flex;flex-direction:column;align-items:center;gap:20px;text-align:center}
+.card.left{align-items:stretch;text-align:left}
+.hello{font-size:44px;color:var(--pri)}
+.dots{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;justify-content:center;gap:8px}
+.dots li{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;background:#fff;color:var(--muted);border:3px solid var(--edge)}
+.dots li.done{background:var(--ink);color:#fff;border-color:var(--ink)}
+.dots li.now{background:var(--acc);color:var(--ink);border-color:var(--ink)}
+.ask{font-size:28px}
+.clock{width:100%;max-width:320px;height:auto;display:block}
+.period{display:flex;align-items:center;gap:8px;background:var(--ground);border-radius:999px;padding:8px 18px;font-weight:800;font-size:18px}
+.field{display:flex;flex-direction:column;align-items:center;gap:8px}
+.field label{font-weight:800;font-size:17px}
+.field .row{display:flex;align-items:center;gap:10px}
+.field .hint{font-size:15px;font-weight:700;color:var(--muted)}
+.num{width:92px;height:76px;border:3px solid var(--ink);border-radius:18px;background:#fff;color:var(--ink);font-family:'Bangers','Nunito',sans-serif;font-size:40px;text-align:center}
+.num[aria-invalid="true"]{border-color:var(--bad);background:var(--bad-bg)}
+.colon{font-family:'Bangers',sans-serif;font-size:44px;line-height:1}
+.name{width:100%;max-width:360px;height:72px;border:3px solid var(--ink);border-radius:18px;font-family:inherit;font-weight:800;font-size:30px;text-align:center;color:var(--ink)}
+.lead{font-weight:800;font-size:18px}
+.msg{margin:0;min-height:24px;font-weight:800;font-size:17px;color:var(--bad-ink)}
+.results{width:100%;max-width:1080px;display:flex;flex-direction:column;align-items:center;gap:24px}
+.results .card{max-width:none;gap:8px}
+.score{font-size:84px;line-height:1;color:var(--pri)}
+.verdict{font-size:28px}
+.grid{list-style:none;margin:0;padding:0;width:100%;display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:16px}
+.res{border-radius:16px;padding:14px 14px 16px;display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center}
+.res.ok{background:var(--ok-bg);border:3px solid var(--ok);color:var(--ok-ink)}
+.res.bad{background:var(--bad-bg);border:3px dashed var(--bad);color:var(--bad-ink)}
+.res .top{width:100%;display:flex;align-items:center;justify-content:space-between;gap:8px;font-weight:800;font-size:16px}
+.res .top span{display:flex;align-items:center;gap:6px}
+.res .cap{font-size:15px;font-weight:700;color:var(--ink)}
+.res .val{font-family:'Bangers','Nunito',sans-serif;font-size:26px;line-height:1.1}
+.res .val.right{color:var(--ink)}
+.res .when{font-size:14px;font-weight:700;color:var(--muted);min-height:19px}
+fieldset{margin:0;padding:0;border:none}
+legend{padding:0;margin-bottom:10px;font-weight:800;font-size:18px}
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.opts.col{grid-template-columns:1fr}
+.opt{min-height:56px;padding:10px 14px;border-radius:18px;border:3px solid var(--edge);background:#fff;color:var(--ink);font-weight:800;font-size:16px;text-align:left}
+.opt small{display:block;font-weight:700;font-size:14px}
+.opt[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+.rowbtns{display:flex;flex-wrap:wrap;justify-content:center;gap:14px}
+.rowbtns.start{justify-content:flex-start}
+.rowbtns.gap{margin-top:12px}
+.note{margin:0;font-size:16px;font-weight:700;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+<h1>Która godzina?</h1>
+<div class="tools">
+<button type="button" class="btn-s" data-act="player" id="btn-player">Zmień gracza</button>
+<button type="button" class="btn-s" data-act="settings">Ustawienia</button>
+</div>
+</header>
+<div id="app" style="width:100%;display:flex;flex-direction:column;align-items:center"></div>
+</div>
+<script>
+(function () {
+  var TOTAL = 10, STORE = 'zegar.v1';
+  var S = { name: '', view: 'start', prev: 'start', mode: '24', step: 5, numMode: '12', dMode: '24', dStep: 5, dNum: '12' };
+  var app = document.getElementById('app'), btnPlayer = document.getElementById('btn-player');
+  var css = getComputedStyle(document.documentElement);
+  var C = { ink: css.getPropertyValue('--ink').trim(), pri: css.getPropertyValue('--pri').trim(), acc: css.getPropertyValue('--acc').trim() };
+
+  function load() {
+    try {
+      var d = JSON.parse(localStorage.getItem(STORE) || '{}');
+      if (typeof d.name === 'string') S.name = d.name.slice(0, 20);
+      if (['24', '12', 'both'].indexOf(d.mode) >= 0) S.mode = d.mode;
+      if ([60, 15, 5, 1].indexOf(d.step) >= 0) S.step = d.step;
+      if (['none', '12', 'both'].indexOf(d.numMode) >= 0) S.numMode = d.numMode;
+    } catch (e) {}
+  }
+  function save() {
+    try { localStorage.setItem(STORE, JSON.stringify({ name: S.name, mode: S.mode, step: S.step, numMode: S.numMode })); } catch (e) {}
+  }
+
+  function newGame() {
+    var qs = [], seen = {};
+    var count = Math.min(TOTAL, (S.mode === '12' ? 12 : 24) * (60 / S.step));
+    while (qs.length < count) {
+      var h = Math.floor(Math.random() * 24);
+      var m = Math.floor(Math.random() * (60 / S.step)) * S.step;
+      var key = (S.mode === '12' ? h % 12 : h) + ':' + m;
+      if (seen[key]) continue;
+      seen[key] = true;
+      qs.push({ h: h, m: m });
+    }
+    S.qs = qs; S.i = 0; S.results = []; S.a = emptyAnswer();
+  }
+  function emptyAnswer() { return { h24: '', m24: '', h12: '', m12: '' }; }
+  function pad(n) { return (n < 10 ? '0' : '') + n; }
+  function h12(h) { return h % 12 || 12; }
+  function esc(t) { return String(t).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function period(h) {
+    if (h < 5) return 'noc';
+    if (h < 12) return 'rano';
+    if (h < 18) return 'po południu';
+    if (h < 22) return 'wieczór';
+    return 'noc';
+  }
+  function kinds() { return S.mode === 'both' ? ['24', '12'] : [S.mode]; }
+  function correctText(q) {
+    var t24 = q.h + ':' + pad(q.m), t12 = h12(q.h) + ':' + pad(q.m);
+    if (S.mode === '24') return t24;
+    if (S.mode === '12') return t12;
+    return t24 + ' (czyli ' + t12 + ')';
+  }
+  function givenText(a) {
+    function one(h, m) { return (h === '' ? '–' : h) + ':' + (m === '' ? '––' : (m.length < 2 ? '0' + m : m)); }
+    if (S.mode === '24') return one(a.h24, a.m24);
+    if (S.mode === '12') return one(a.h12, a.m12);
+    return one(a.h24, a.m24) + ' i ' + one(a.h12, a.m12);
+  }
+
+  function clock(q, small) {
+    var out = '<svg class="' + (small ? '' : 'clock') + '" viewBox="0 0 200 200" role="img" aria-label="Zegar analogowy"' + (small ? ' width="120" height="120"' : '') + '>';
+    out += '<circle cx="100" cy="100" r="97" fill="' + C.acc + '"/><circle cx="100" cy="100" r="88" fill="#fff" stroke="' + C.ink + '" stroke-width="2.5"/>';
+    for (var t = 0; t < 60; t++) {
+      var major = t % 5 === 0;
+      if (small && !major) continue;
+      out += '<line x1="100" y1="' + (major ? 4 : 5.5) + '" x2="100" y2="' + (major ? 11 : 9.5) + '" stroke="' + C.ink + '" stroke-linecap="round" stroke-width="' + (small ? 5 : (major ? 3 : 1.4)) + '" transform="rotate(' + t * 6 + ' 100 100)"/>';
+    }
+    if (!small && S.numMode !== 'none') {
+      for (var n = 1; n <= 12; n++) {
+        var r = n * 30 * Math.PI / 180;
+        out += '<text x="' + (100 + 75 * Math.sin(r)).toFixed(1) + '" y="' + (100 - 75 * Math.cos(r)).toFixed(1) + '" font-family="Bangers, Nunito, sans-serif" font-size="17" fill="' + C.ink + '" text-anchor="middle" dominant-baseline="central">' + n + '</text>';
+        if (S.numMode === 'both') out += '<text x="' + (100 + 59 * Math.sin(r)).toFixed(1) + '" y="' + (100 - 59 * Math.cos(r)).toFixed(1) + '" font-family="Bangers, Nunito, sans-serif" font-size="10" fill="' + C.pri + '" text-anchor="middle" dominant-baseline="central">' + (n + 12) + '</text>';
+      }
+    }
+    var ha = (q.h % 12) * 30 + q.m * 0.5, ma = q.m * 6;
+    out += '<line x1="100" y1="108" x2="100" y2="' + (small ? 54 : 64) + '" stroke="' + C.ink + '" stroke-width="' + (small ? 10 : 7) + '" stroke-linecap="round" transform="rotate(' + ha + ' 100 100)"/>';
+    out += '<line x1="100" y1="112" x2="100" y2="' + (small ? 27 : 48) + '" stroke="' + C.pri + '" stroke-width="' + (small ? 7 : 4.5) + '" stroke-linecap="round" transform="rotate(' + ma + ' 100 100)"/>';
+    out += '<circle cx="100" cy="100" r="6" fill="' + C.ink + '"/></svg>';
+    return out;
+  }
+
+  function field(kind) {
+    var is24 = kind === '24';
+    return '<div class="field"><label for="h' + kind + '">Godzina w systemie ' + kind + '-godzinnym</label><div class="row">' +
+      '<input class="num" id="h' + kind + '" data-f="h' + kind + '" type="text" inputmode="numeric" maxlength="2" autocomplete="off" placeholder="gg" aria-describedby="hint' + kind + '" value="' + esc(S.a['h' + kind]) + '">' +
+      '<span class="colon" aria-hidden="true">:</span>' +
+      '<input class="num" data-f="m' + kind + '" type="text" inputmode="numeric" maxlength="2" autocomplete="off" placeholder="mm" aria-label="Minuty w systemie ' + kind + '-godzinnym" aria-describedby="hint' + kind + '" value="' + esc(S.a['m' + kind]) + '"></div>' +
+      '<div class="hint" id="hint' + kind + '">' + (is24 ? 'Godziny od 0 do 23, na przykład 15:20' : 'Godziny od 1 do 12, na przykład 3:20') + '</div></div>';
+  }
+  function msgBox() { return '<p class="msg" id="msg" role="alert"></p>'; }
+
+  function viewStart() {
+    return '<main class="card"><h2 class="comic hello">Cześć! Jak masz na imię?</h2>' +
+      '<label class="lead" for="name">Wpisz swoje imię, a potem odczytaj godzinę z ' + TOTAL + ' zegarów.</label>' +
+      '<input class="name" id="name" type="text" maxlength="20" autocomplete="off" placeholder="Twoje imię" value="' + esc(S.name) + '">' +
+      '<button type="button" class="btn" data-act="start">Zaczynamy!</button></main>';
+  }
+
+  function viewGame() {
+    var q = S.qs[S.i], n = S.qs.length, dots = '';
+    for (var d = 0; d < n; d++) dots += '<li class="' + (d < S.i ? 'done' : (d === S.i ? 'now' : '')) + '"' + (d === S.i ? ' aria-current="step"' : '') + '>' + (d + 1) + '</li>';
+    var name = S.name.trim();
+    var html = '<main class="card"><ol class="dots" aria-label="Zegar ' + (S.i + 1) + ' z ' + n + '">' + dots + '</ol>' +
+      '<div class="comic ask">' + (name ? esc(name) + ', która' : 'Która') + ' jest godzina?</div>' + clock(q, false);
+    if (S.mode !== '12') html += '<div class="period">Jest ' + period(q.h) + '</div>';
+    html += kinds().map(field).join('');
+    html += msgBox() + '<button type="button" class="btn" data-act="next">' + (S.i >= n - 1 ? 'Zobacz wynik' : 'Następny') + '</button></main>';
+    return html;
+  }
+
+  function viewResults() {
+    var n = S.qs.length, score = S.results.filter(function (r) { return r.ok; }).length, name = S.name.trim();
+    var verdict = 'Ćwicz dalej, z każdą grą będzie łatwiej!';
+    if (score === n) verdict = 'Mistrz zegara! Wszystko dobrze!';
+    else if (score >= n * 0.8) verdict = 'Świetna robota!';
+    else if (score >= n * 0.5) verdict = 'Dobrze ci idzie!';
+    var cards = S.results.map(function (r, i) {
+      return '<li class="res ' + (r.ok ? 'ok' : 'bad') + '"><div class="top"><span>Zegar ' + (i + 1) + '</span><span>' + (r.ok ? '✔ Dobrze' : '✖ Źle') + '</span></div>' +
+        clock(r.q, true) + '<div class="when">' + (S.mode === '12' ? '' : period(r.q.h)) + '</div>' +
+        '<div class="cap">Twoja odpowiedź</div><div class="val">' + esc(givenText(r.a)) + '</div>' +
+        '<div class="cap">Poprawna godzina</div><div class="val right">' + correctText(r.q) + '</div></li>';
+    }).join('');
+    return '<main class="results"><section class="card"><div class="lead">' + (name ? 'Koniec gry! Wynik gracza ' + esc(name) + ':' : 'Koniec gry! Twój wynik:') + '</div>' +
+      '<div class="comic score">' + score + ' / ' + n + '</div><div class="comic verdict">' + verdict + '</div>' +
+      '<div class="rowbtns gap"><button type="button" class="btn" data-act="again">Zagraj jeszcze raz</button>' +
+      '<button type="button" class="btn alt" data-act="player">Zmień gracza</button></div></section>' +
+      '<h2 style="align-self:flex-start">Twoje zegary</h2><ol class="grid">' + cards + '</ol></main>';
+  }
+
+  function viewGate() {
+    return '<main class="card"><h2>Tylko dla dorosłych</h2>' +
+      '<label class="lead" for="gate">Żeby otworzyć ustawienia, rozwiąż: ile to ' + S.gate[0] + ' × ' + S.gate[1] + '?</label>' +
+      '<input class="num" id="gate" type="text" inputmode="numeric" maxlength="3" autocomplete="off">' + msgBox() +
+      '<div class="rowbtns"><button type="button" class="btn" data-act="gateOk">Otwórz</button>' +
+      '<button type="button" class="btn alt" data-act="back">Wróć</button></div></main>';
+  }
+
+  function opts(group, cur, list, col) {
+    return '<div class="opts' + (col ? ' col' : '') + '">' + list.map(function (o) {
+      return '<button type="button" class="opt" data-set="' + group + '" data-v="' + o[0] + '" aria-pressed="' + (String(cur) === String(o[0])) + '">' + o[1] + (o[2] ? '<small>' + o[2] + '</small>' : '') + '</button>';
+    }).join('') + '</div>';
+  }
+  function viewSettings() {
+    return '<main class="card left"><div><h2 tabindex="-1" data-focus>Ustawienia</h2><p class="note">Panel dla rodzica lub nauczyciela. Zapisanie zmian rozpoczyna nową grę. Ustawienia są zapamiętywane w tej przeglądarce.</p></div>' +
+      '<fieldset><legend>Jak dziecko wpisuje godzinę?</legend>' + opts('dMode', S.dMode, [
+        ['24', 'Tylko system 24-godzinny', 'Jedno pole, na przykład 15:20'],
+        ['12', 'Tylko system 12-godzinny', 'Jedno pole, na przykład 3:20'],
+        ['both', 'Oba systemy naraz', 'Dwa pola, punkt za obie dobre odpowiedzi']], true) + '</fieldset>' +
+      '<fieldset><legend>Poziom trudności (minuty)</legend>' + opts('dStep', S.dStep, [[60, 'Pełne godziny'], [15, 'Co 15 minut'], [5, 'Co 5 minut'], [1, 'Co 1 minutę']]) + '</fieldset>' +
+      '<fieldset><legend>Cyfry na tarczy zegara</legend>' + opts('dNum', S.dNum, [['none', 'Bez cyfr'], ['12', 'Cyfry 1–12'], ['both', 'Cyfry 1–12 i 13–24']]) + '</fieldset>' +
+      '<div class="rowbtns start"><button type="button" class="btn" data-act="save">Zapisz i zacznij nową grę</button>' +
+      '<button type="button" class="btn alt" data-act="back">Wróć bez zmian</button></div></main>';
+  }
+
+  var views = { start: viewStart, game: viewGame, results: viewResults, gate: viewGate, settings: viewSettings };
+  function render() {
+    app.innerHTML = views[S.view]();
+    btnPlayer.hidden = S.view === 'start';
+    var first = app.querySelector('input, [data-focus]');
+    if (first) first.focus();
+    window.scrollTo(0, 0);
+  }
+  function showMsg(text, bad) {
+    var box = document.getElementById('msg');
+    if (box) box.textContent = text;
+    app.querySelectorAll('input.num').forEach(function (el) { el.removeAttribute('aria-invalid'); });
+    (bad || []).forEach(function (el) { el.setAttribute('aria-invalid', 'true'); });
+    if (bad && bad[0]) bad[0].focus();
+  }
+  function input(f) { return app.querySelector('[data-f="' + f + '"]'); }
+
+  function next() {
+    var q = S.qs[S.i], a = S.a, ks = kinds(), empty = [], range = [];
+    ks.forEach(function (k) {
+      var h = a['h' + k], m = a['m' + k], hn = parseInt(h, 10), mn = parseInt(m, 10);
+      var maxH = k === '24' ? 24 : 12, minH = k === '24' ? 0 : 1;
+      if (h === '') empty.push(input('h' + k)); else if (hn < minH || hn > maxH || (k === '24' && hn === 24 && m !== '' && mn !== 0)) range.push(input('h' + k));
+      if (m === '') empty.push(input('m' + k)); else if (mn > 59) range.push(input('m' + k));
+    });
+    if (empty.length) return showMsg('Wpisz godzinę i minuty, zanim przejdziesz dalej.', empty);
+    if (range.length) return showMsg(ks.length > 1 ? 'Sprawdź liczby: godziny 0–23 i 1–12, minuty 0–59.' : (ks[0] === '24' ? 'Sprawdź liczby: godziny od 0 do 23, minuty od 0 do 59.' : 'Sprawdź liczby: godziny od 1 do 12, minuty od 0 do 59.'), range);
+    var h24 = parseInt(a.h24, 10), m24 = parseInt(a.m24, 10);
+    // Północ można zapisać jako 0:00 albo 24:00.
+    var ok24 = m24 === q.m && (h24 === q.h || (h24 === 24 && q.h === 0 && q.m === 0));
+    var ok12 = parseInt(a.h12, 10) === h12(q.h) && parseInt(a.m12, 10) === q.m;
+    S.results.push({ q: q, a: a, ok: (S.mode === '12' || ok24) && (S.mode === '24' || ok12) });
+    if (S.i >= S.qs.length - 1) S.view = 'results'; else { S.i++; S.a = emptyAnswer(); }
+    render();
+  }
+
+  var acts = {
+    start: function () { save(); S.view = 'game'; render(); },
+    next: next,
+    again: function () { newGame(); S.view = 'game'; render(); },
+    player: function () { S.name = ''; save(); newGame(); S.view = 'start'; render(); },
+    settings: function () {
+      if (S.view === 'gate' || S.view === 'settings') return;
+      S.prev = S.view;
+      S.gate = [3 + Math.floor(Math.random() * 7), 3 + Math.floor(Math.random() * 7)];
+      S.view = 'gate'; render();
+    },
+    gateOk: function () {
+      var el = document.getElementById('gate');
+      if (parseInt(el.value, 10) !== S.gate[0] * S.gate[1]) { el.value = ''; return showMsg('To nie jest dobry wynik. Spróbuj jeszcze raz.', [el]); }
+      S.dMode = S.mode; S.dStep = S.step; S.dNum = S.numMode;
+      S.view = 'settings'; render();
+    },
+    back: function () { S.view = S.prev; render(); },
+    save: function () {
+      S.mode = S.dMode; S.step = S.dStep; S.numMode = S.dNum; save();
+      newGame(); S.view = S.prev === 'start' ? 'start' : 'game'; render();
+    }
+  };
+
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest('button');
+    if (!b) return;
+    if (b.dataset.act && acts[b.dataset.act]) acts[b.dataset.act]();
+    else if (b.dataset.set) {
+      var g = b.dataset.set;
+      S[g] = g === 'dStep' ? parseInt(b.dataset.v, 10) : b.dataset.v;
+      app.querySelectorAll('[data-set="' + g + '"]').forEach(function (o) { o.setAttribute('aria-pressed', String(o === b)); });
+    }
+  });
+  app.addEventListener('input', function (e) {
+    var el = e.target;
+    if (el.id === 'name') S.name = el.value.slice(0, 20);
+    else if (el.classList.contains('num')) {
+      el.value = el.value.replace(/[^0-9]/g, '');
+      if (el.dataset.f) {
+        S.a[el.dataset.f] = el.value;
+        if (el.value.length === 2) focusNext(el);
+      }
+    }
+  });
+  function focusNext(el) {
+    var all = Array.prototype.slice.call(app.querySelectorAll('input'));
+    var nx = all[all.indexOf(el) + 1];
+    if (nx) { nx.focus(); nx.select(); return true; }
+    return false;
+  }
+  app.addEventListener('keydown', function (e) {
+    if (e.key !== 'Enter' || e.target.tagName !== 'INPUT') return;
+    e.preventDefault();
+    if (!e.target.dataset.f || !focusNext(e.target)) {
+      var main = app.querySelector('.btn[data-act]');
+      if (main) main.click();
+    }
+  });
+
+  load();
+  newGame();
+  render();
+})();
+</script>
+</body>
+</html>
