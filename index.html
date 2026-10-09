@@ -58,7 +58,8 @@ input:focus-visible,button:focus-visible{outline:4px solid var(--acc);outline-of
 .res .cap{font-size:15px;font-weight:700;color:var(--ink)}
 .res .val{font-family:'Bangers','Nunito',sans-serif;font-size:26px;line-height:1.1}
 .res .val.right{color:var(--ink)}
-.res .when{font-size:14px;font-weight:700;color:var(--muted);min-height:19px}
+.res .when{display:flex;align-items:center;justify-content:center;gap:6px;font-size:14px;font-weight:700;color:var(--muted);min-height:19px}
+.ico{flex:none;display:block}
 fieldset{margin:0;padding:0;border:none}
 legend{padding:0;margin-bottom:10px;font-weight:800;font-size:18px}
 .opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
@@ -128,6 +129,17 @@ legend{padding:0;margin-bottom:10px;font-weight:800;font-size:18px}
     if (h < 22) return 'wieczór';
     return 'noc';
   }
+  function periodIcon(h, size) {
+    var day = h >= 5 && h < 18, out = '<svg class="ico" width="' + size + '" height="' + size + '" viewBox="0 0 24 24" aria-hidden="true">';
+    if (day) {
+      out += '<g stroke="' + C.ink + '" stroke-width="2" stroke-linecap="round">';
+      for (var i = 0; i < 8; i++) out += '<line x1="12" y1="1.5" x2="12" y2="4.5" transform="rotate(' + i * 45 + ' 12 12)"/>';
+      out += '</g><circle cx="12" cy="12" r="5" fill="#FF9500" stroke="' + C.ink + '" stroke-width="2"/>';
+    } else {
+      out += '<path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z" fill="' + C.pri + '" stroke="' + C.ink + '" stroke-width="2" stroke-linejoin="round"/>';
+    }
+    return out + '</svg>';
+  }
   function kinds() { return S.mode === 'both' ? ['24', '12'] : [S.mode]; }
   function correctText(q) {
     var t24 = q.h + ':' + pad(q.m), t12 = h12(q.h) + ':' + pad(q.m);
@@ -187,7 +199,7 @@ legend{padding:0;margin-bottom:10px;font-weight:800;font-size:18px}
     var name = S.name.trim();
     var html = '<main class="card"><ol class="dots" aria-label="Zegar ' + (S.i + 1) + ' z ' + n + '">' + dots + '</ol>' +
       '<div class="comic ask">' + (name ? esc(name) + ', która' : 'Która') + ' jest godzina?</div>' + clock(q, false);
-    if (S.mode !== '12') html += '<div class="period">Jest ' + period(q.h) + '</div>';
+    if (S.mode !== '12') html += '<div class="period">' + periodIcon(q.h, 22) + 'Jest ' + period(q.h) + '</div>';
     html += kinds().map(field).join('');
     html += msgBox() + '<button type="button" class="btn" data-act="next">' + (S.i >= n - 1 ? 'Zobacz wynik' : 'Następny') + '</button></main>';
     return html;
@@ -201,7 +213,7 @@ legend{padding:0;margin-bottom:10px;font-weight:800;font-size:18px}
     else if (score >= n * 0.5) verdict = 'Dobrze ci idzie!';
     var cards = S.results.map(function (r, i) {
       return '<li class="res ' + (r.ok ? 'ok' : 'bad') + '"><div class="top"><span>Zegar ' + (i + 1) + '</span><span>' + (r.ok ? '✔ Dobrze' : '✖ Źle') + '</span></div>' +
-        clock(r.q, true) + '<div class="when">' + (S.mode === '12' ? '' : period(r.q.h)) + '</div>' +
+        clock(r.q, true) + '<div class="when">' + (S.mode === '12' ? '' : periodIcon(r.q.h, 16) + period(r.q.h)) + '</div>' +
         '<div class="cap">Twoja odpowiedź</div><div class="val">' + esc(givenText(r.a)) + '</div>' +
         '<div class="cap">Poprawna godzina</div><div class="val right">' + correctText(r.q) + '</div></li>';
     }).join('');
